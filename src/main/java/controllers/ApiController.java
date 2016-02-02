@@ -32,7 +32,7 @@ public class ApiController {
 
     static String awsAccessKey = System.getenv().get("AWS_ACCESS_KEY");
     static String awsSecretKey = System.getenv().get("AWS_SECRET_KEY");
-    
+
     private static SecureRandom random = new SecureRandom();
     private static S3Bucket picturesBucket;
     private static S3Service service;

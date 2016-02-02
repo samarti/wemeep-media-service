@@ -18,7 +18,7 @@ public class Server {
     public static void main(String [] args){
 
         DBController controller = new DBController();
-        //controller.init();
+        controller.init();
 
         get("/", (request, response) -> "WeMeep Media Service");
 
