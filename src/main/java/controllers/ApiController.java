@@ -89,10 +89,9 @@ public class ApiController {
             auxFile.createNewFile();
             outputStream = new FileOutputStream(auxFile);
             byte[] auxBytes = new byte[1024];
-            int read = 0;
-            while(inputStream.read(auxBytes, read, 1024) > -1) {
-                outputStream.write(auxBytes);
-                read += 1024;
+            int read;
+            while((read = inputStream.read(auxBytes)) != -1) {
+                outputStream.write(auxBytes, 0, read);
             }
 
             File fileData = new File(tempFile);
@@ -143,8 +142,9 @@ public class ApiController {
             String fileName =  getRandomString() + "_" + p.getSubmittedFileName();
             String tempFile = "/wemeep/" + fileName;
             InputStream inputStream = p.getInputStream();
-
-            outputStream = new FileOutputStream(new File(tempFile));
+            File auxFile = new File(tempFile);
+            auxFile.createNewFile();
+            outputStream = new FileOutputStream(tempFile);
             int read = 0;
             byte[] bytes = new byte[1024];
 
