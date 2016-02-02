@@ -85,8 +85,9 @@ public class ApiController {
             String fileName =  getRandomString() + "_" + p.getSubmittedFileName();
             String tempFile = "/wemeep/" + fileName;
             InputStream inputStream = p.getInputStream();
-
-            outputStream = new FileOutputStream(new File(tempFile));
+            File auxFile = new File(tempFile);
+            outputStream = new FileOutputStream(auxFile);
+            auxFile.createNewFile();
             int read = 0;
             byte[] bytes = new byte[1024];
 
