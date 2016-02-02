@@ -1,0 +1,35 @@
+.gradle
+build/
+
+# Ignore Gradle GUI config
+gradle-app.setting
+
+# Avoid ignoring Gradle wrapper jar file (.jar files are usually ignored)
+!gradle-wrapper.jar
+
+.DS_Store
+dclean.sh
+
+# built application files
+*.apk
+*.ap_
+
+# files for the dex VM
+*.dex
+
+# Java class files
+*.class
+
+# Intellij project files
+*.iml
+*.ipr
+*.iws
+.idea/
+
+#Gradle
+.gradletasknamecache
+.gradle/
+build/
+bin/
+src/test/
+sessionData/

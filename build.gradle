@@ -1,0 +1,27 @@
+group 'com.we.meep'
+version '1.0'
+
+apply plugin: 'java'
+
+sourceCompatibility = 1.5
+
+jar {
+    manifest {
+        attributes 'Main-Class': 'api.Server'
+    }
+    from {
+        configurations.compile.collect { it.isDirectory() ? it : zipTree(it) }
+    }
+}
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    testCompile group: 'junit', name: 'junit', version: '4.11'
+    compile 'com.sparkjava:spark-core:2.3'
+    compile 'com.google.code.gson:gson:1.7.2'
+    compile 'org.postgresql:postgresql:9.4-1206-jdbc42'
+    compile 'net.java.dev.jets3t:jets3t:0.9.4'
+}
