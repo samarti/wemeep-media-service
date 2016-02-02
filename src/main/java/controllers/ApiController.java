@@ -83,7 +83,7 @@ public class ApiController {
             }
             Part p = (Part) files.toArray()[0];
             String fileName =  getRandomString() + "_" + p.getSubmittedFileName();
-            String tempFile = "/wemeep/" + fileName;
+            String tempFile = "/" + fileName;
             InputStream inputStream = p.getInputStream();
             File auxFile = new File(tempFile);
             auxFile.createNewFile();
@@ -140,7 +140,7 @@ public class ApiController {
             }
             Part p = (Part) files.toArray()[0];
             String fileName =  getRandomString() + "_" + p.getSubmittedFileName();
-            String tempFile = "/wemeep/" + fileName;
+            String tempFile = "/" + fileName;
             InputStream inputStream = p.getInputStream();
             File auxFile = new File(tempFile);
             auxFile.createNewFile();
@@ -162,7 +162,7 @@ public class ApiController {
             DBController controller = new DBController();
             controller.insertCommentPicture(fileName, senderId, commentId, rootMeepId);
         } catch (ServletException | S3ServiceException | NoSuchAlgorithmException | IOException e2){
-            System.out.println(e2.toString());
+            System.out.println(e2.getMessage());
             ret.addProperty("Error", e2.toString());
         } finally {
             response.body(ret.toString());
