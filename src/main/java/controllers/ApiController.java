@@ -107,7 +107,7 @@ public class ApiController {
             System.out.println(e2.toString());
             ret.addProperty("Error", e2.toString());
         } finally {
-            response.body(ret.getAsString());
+            response.body(ret.toString());
             return response;
         }
     }
@@ -164,7 +164,7 @@ public class ApiController {
             System.out.println(e2.toString());
             ret.addProperty("Error", e2.toString());
         } finally {
-            response.body(ret.getAsString());
+            response.body(ret.toString());
             return response;
         }
     }
