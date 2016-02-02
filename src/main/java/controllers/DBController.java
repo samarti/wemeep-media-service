@@ -2,9 +2,10 @@ package controllers;
 
 import java.net.InetAddress;
 import java.net.UnknownHostException;
-import java.sql.*;
-import java.text.SimpleDateFormat;
-import java.util.LinkedList;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.SQLException;
+import java.sql.Statement;
 
 /**
  * Created by the mighty and powerful santiagomarti on 2/2/16.

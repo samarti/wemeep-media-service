@@ -20,6 +20,8 @@ public class Server {
         DBController controller = new DBController();
         controller.init();
 
+        ApiController.init();
+
         get("/", (request, response) -> "WeMeep Media Service");
 
         get("/pictures/profile/:id", (request, response) -> ApiController.getProfilePicture(response, request).body());
