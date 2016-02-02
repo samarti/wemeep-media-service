@@ -86,13 +86,13 @@ public class ApiController {
             String tempFile = "/wemeep/" + fileName;
             InputStream inputStream = p.getInputStream();
             File auxFile = new File(tempFile);
-            outputStream = new FileOutputStream(auxFile);
             auxFile.createNewFile();
+            outputStream = new FileOutputStream(auxFile);
+            byte[] auxBytes = new byte[1024];
             int read = 0;
-            byte[] bytes = new byte[1024];
-
-            while ((read = inputStream.read(bytes)) != -1) {
-                outputStream.write(bytes, 0, read);
+            while(inputStream.read(auxBytes, read, 1024) > -1) {
+                outputStream.write(auxBytes);
+                read += 1024;
             }
 
             File fileData = new File(tempFile);
