@@ -1,6 +1,7 @@
 # WeMeep Media Service
 ### Description
-This service handles all the user session info, like all their logged devices, session tokens and so on. It's built over Docker containers and uses Java Spark, Gradle and PostgreSql.
+This service handles all the media (pictures, video, etc.). It's built over Docker containers and uses Java Spark, Gradle, PostgreSql and
+Amazon S3 for storage.
 
 ### Setup
 #### Docker
@@ -24,13 +25,12 @@ Set:
 ### WebService
 The web service exposes the following methods:
 
-- Upload a profile picture with `POST`:
+- Upload a profile picture with `POST`. Picture must be a form-data key-value entry, with
+ key = "picture" and lighter than 200Kb:
 
 ```
 http://host:4567/pictures/profile
-
-Data: { body: { userId:<someId> } }
-Returns { "url": <picture url>, "thumb_url": <thumb url> }
+Returns { "url": <picture url> } or { "Error": <some error>}
 ```
 
 
@@ -38,17 +38,15 @@ Returns { "url": <picture url>, "thumb_url": <thumb url> }
 
 ```
 http://host:4567/pictures/profile/<userId>
-
-Returns  { "url": <picture url>, "thumb_url": <thumb url> }
+Returns  { "url": <picture url> } or { "Error": <some error>}
 ```
 
-- Upload a comment picture with `POST`:
+- Upload a comment picture with `POST`. Picture must be a form-data key-value entry, with
+key = "picture" and lighter than 1Mb:
 
 ```
-http://host:4567/pictures/comment
-
-Data: { body: { senderId:<someId>, rootMeepId: <someId>, commentId:<someId>} }
-Returns { "url": <picture url>, "thumb_url": <thumb url> }
+http://host:4567/pictures/comment/<commentId>
+Returns { "url": <picture url>} or { "Error": <some error>}
 ```
 
 
@@ -57,7 +55,7 @@ Returns { "url": <picture url>, "thumb_url": <thumb url> }
 ```
 http://host:4567/pictures/comment/<commentId>
 
-Returns  { "url": <picture url>, "thumb_url": <thumb url> }
+Returns  { "url": <picture url> } or { "Error": <some error>}
 ```
 
 
