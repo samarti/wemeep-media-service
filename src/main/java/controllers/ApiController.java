@@ -136,8 +136,8 @@ public class ApiController {
             }
             outputStream.close();
             inputStream.close();
-            if(auxFile.length() > 200 * 1000)
-                throw new Exception("File must be lighter than 200kB");
+            if(auxFile.length() > 800 * 1000)
+                throw new Exception("File must be lighter than 800kB");
             DBController controller = new DBController();
             String existentName = controller.getUserPicture(id);
             if(existentName != null)
@@ -205,8 +205,8 @@ public class ApiController {
             }
             outputStream.close();
             inputStream.close();
-            if(auxFile.length() > 1000 * 1000)
-                throw new Exception("File must be lighter than 1000kB");
+            if(auxFile.length() > 1500 * 1000)
+                throw new Exception("File must be lighter than 1500kB");
             DBController controller = new DBController();
             String existentName = controller.getCommentPicture(comId);
             if(existentName != null)

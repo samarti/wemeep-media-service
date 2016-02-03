@@ -26,7 +26,7 @@ Set:
 The web service exposes the following methods:
 
 - Upload a profile picture with `POST`. Picture must be a form-data key-value entry, with
- key = "picture" and lighter than 200Kb:
+ key = "picture" and lighter than 800Kb:
 
 ```
 http://host:4567/pictures/profile
@@ -42,7 +42,7 @@ Returns  { "url": <picture url> } or { "Error": <some error>}
 ```
 
 - Upload a comment picture with `POST`. Picture must be a form-data key-value entry, with
-key = "picture" and lighter than 1Mb:
+key = "picture" and lighter than 1.5Mb:
 
 ```
 http://host:4567/pictures/comment/<commentId>
