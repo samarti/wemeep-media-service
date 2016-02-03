@@ -29,7 +29,7 @@ The web service exposes the following methods:
  key = "picture" and lighter than 200Kb:
 
 ```
-http://host:4567/pictures/profile
+http://host:4567/pictures/profile/<userId>
 Returns { "url": <picture url> } or { "Error": <some error>}
 ```
 
