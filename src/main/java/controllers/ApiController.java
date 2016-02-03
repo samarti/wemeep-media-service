@@ -60,7 +60,7 @@ public class ApiController {
             String fileName = controller.getUserPicture(id);
             if(fileName == null)
                 throw new Exception("User not found");
-            ret.addProperty("path", ROOT_URL + fileName);
+            ret.addProperty("url", ROOT_URL + fileName);
         } catch (Exception e){
             ret.addProperty("Error", e.getMessage());
         } finally {
@@ -79,7 +79,7 @@ public class ApiController {
             String fileName = controller.getCommentPicture(id);
             if(fileName == null)
                 throw new Exception("Comment not found");
-            ret.addProperty("path", ROOT_URL + fileName);
+            ret.addProperty("url", ROOT_URL + fileName);
         } catch (Exception e){
             ret.addProperty("Error", e.getMessage());
         } finally {
@@ -152,7 +152,8 @@ public class ApiController {
             ret.addProperty("Error", e2.getMessage());
         } finally {
             response.body(ret.toString());
-            auxFile.delete();
+            if(auxFile != null)
+                auxFile.delete();
             return response;
         }
     }
@@ -221,7 +222,8 @@ public class ApiController {
             ret.addProperty("Error", e2.getMessage());
         } finally {
             response.body(ret.toString());
-            auxFile.delete();
+            if(auxFile != null)
+                auxFile.delete();
             return response;
         }
     }
