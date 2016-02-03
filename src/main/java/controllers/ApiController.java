@@ -94,11 +94,11 @@ public class ApiController {
                 outputStream.write(auxBytes, 0, read);
             }
 
-            File fileData = new File(tempFile);
-            S3Object object = new S3Object(fileData);
+            S3Object object = new S3Object(auxFile);
             service.putObject(picturesBucket, object);
             ret.addProperty("Success", true);
             ret.addProperty("fileName", fileName);
+            auxFile.delete();
             outputStream.close();
             inputStream.close();
             DBController controller = new DBController();
@@ -152,11 +152,11 @@ public class ApiController {
                 outputStream.write(bytes, 0, read);
             }
 
-            File fileData = new File(tempFile);
-            S3Object object = new S3Object(fileData);
+            S3Object object = new S3Object(auxFile);
             service.putObject(picturesBucket, object);
             ret.addProperty("Success", true);
             ret.addProperty("fileName", fileName);
+            auxFile.delete();
             outputStream.close();
             inputStream.close();
             DBController controller = new DBController();
