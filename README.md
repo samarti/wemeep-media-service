@@ -45,8 +45,8 @@ Returns  { "url": <picture url> } or { "Error": <some error>}
 key = "picture" and lighter than 1.5Mb:
 
 ```
-http://host:4567/pictures/comment/<commentId>
-Returns { "url": <picture url>} or { "Error": <some error>}
+http://host:4567/pictures/comment/<rootMeepId>
+Returns { "id":<commentId>, "url": <picture url>} or { "Error": <some error>}
 ```
 
 

@@ -32,6 +32,8 @@ public class ApiController {
 
     private static final String ROOT_URL = "https://s3-sa-east-1.amazonaws.com/wemeep-pictures/";
 
+    public static final String MEEP_SERVICE_URL = "http://54.232.209.214:4567/meeps";
+
     private static SecureRandom random = new SecureRandom();
     private static S3Bucket picturesBucket;
     private static S3Service service;
@@ -166,10 +168,10 @@ public class ApiController {
     public static Response postCommentPicture(Response response, Request request){
         JsonObject ret = new JsonObject();
         OutputStream outputStream;
-        String comId = request.params(":id");
+        String meepId = request.params(":id");
         File auxFile = null;
-        if(comId == null){
-            ret.addProperty("Error", "Missing comment id");
+        if(meepId == null){
+            ret.addProperty("Error", "Missing meep id");
             response.body(ret.getAsString());
             return response;
         }
@@ -208,15 +210,21 @@ public class ApiController {
             inputStream.close();
             if(auxFile.length() > 1500 * 1000)
                 throw new Exception("File must be lighter than 1500kB");
+
+            //Creamos el comentario en meep service
+            CommentController commentController = new CommentController();
+            String commentId = commentController.postNewComment(meepId, request.body());
+
+            //Guardamos la info de la imagen en DB local
             DBController controller = new DBController();
-            String existentName = controller.getCommentPicture(comId);
+            String existentName = controller.getCommentPicture(commentId);
             if(existentName != null)
                 service.deleteObject(picturesBucket, existentName);
             S3Object object = new S3Object(auxFile);
             service.putObject(picturesBucket, object);
             ret.addProperty("Success", true);
             ret.addProperty("url", ROOT_URL + fileName);
-            controller.upsertCommentPicture(fileName, comId);
+            controller.upsertCommentPicture(fileName, commentId);
         } catch (Exception e2){
             System.out.println(e2.getMessage());
             ret.addProperty("Error", e2.getMessage());
