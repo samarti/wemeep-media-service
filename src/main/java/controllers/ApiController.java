@@ -31,7 +31,7 @@ public class ApiController {
     static String awsAccessKey = System.getenv().get("AWS_ACCESS_KEY");
     static String awsSecretKey = System.getenv().get("AWS_SECRET_KEY");
 
-    private static final String ROOT_URL = "https://s3-sa-east-1.amazonaws.com/wemeep-pictures/";
+    private static final String ROOT_URL = "http://d1edk0932xwypd.cloudfront.net/";
 
     public static final String MEEP_SERVICE_URL = "http://54.232.209.214:4567/meeps";
 
