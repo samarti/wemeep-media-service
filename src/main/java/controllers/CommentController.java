@@ -22,20 +22,13 @@ import java.io.InputStreamReader;
  */
 public class CommentController {
 
-    private static Gson gson = new Gson();
-
-    public String postNewComment(String rootMeepId, String body) throws Exception {
-        Validator validator = new Validator();
-        Comment com = gson.fromJson(body, Comment.class);
-        if (!validator.validateComment(com)) {
-            throw new Exception("Missing fields");
-        }
+    public String postNewComment(String rootMeepId, String senderName, String senderId) throws Exception {
         HttpClient client = new DefaultHttpClient();
         HttpPost post = new HttpPost(ApiController.MEEP_SERVICE_URL + "/" + rootMeepId + "/comments");
 
         JsonObject json = new JsonObject();
-        json.addProperty("senderName", com.senderName);
-        json.addProperty("senderId", com.senderId);
+        json.addProperty("senderName", senderName);
+        json.addProperty("senderId", senderId);
         json.addProperty("type", "picture");
         StringEntity entity = new StringEntity(json.toString());
         post.setEntity(entity);
@@ -53,26 +46,4 @@ public class CommentController {
             throw new Exception("Error from Meep Service: " + aux.get("Error").getAsString());
         return aux.get("id").getAsString();
     }
-
-    private class Comment {
-        public String senderName, message, senderId, objectId, type;
-
-    }
-
-    private class Validator {
-
-        public boolean validateComment(Comment c){
-            if(c.type == null || (!c.type.equals("text") && !c.type.equals("picture")))
-                return false;
-            if(c.type.equals("text"))
-                if(c.message == null || c.senderId == null || c.senderName == null)
-                    return false;
-            if(c.type.equals("picture"))
-                if(c.senderId == null || c.senderName == null)
-                    return false;
-            return true;
-        }
-    }
-
-
 }

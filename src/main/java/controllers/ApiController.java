@@ -16,6 +16,7 @@ import java.io.*;
 import java.math.BigInteger;
 import java.security.SecureRandom;
 import java.util.Collection;
+import java.util.Map;
 
 /**
  * Created by the mighty and powerful santiagomarti on 2/2/16.
@@ -176,6 +177,12 @@ public class ApiController {
             return response;
         }
         try {
+
+            //Chequeamos que vengan los datos del sender
+            Map<String, String> urlData = Utils.splitQuery(request.queryString());
+            if(!urlData.containsKey("senderName") || !urlData.containsKey("senderId"))
+                throw new Exception("senderName or senderId missing");
+
             MultipartConfigElement multipartConfigElement = new MultipartConfigElement("/temp");
             request.raw().setAttribute("org.eclipse.jetty.multipartConfig",multipartConfigElement);
             Collection<Part> files = request.raw().getParts();
@@ -213,7 +220,7 @@ public class ApiController {
 
             //Creamos el comentario en meep service
             CommentController commentController = new CommentController();
-            String commentId = commentController.postNewComment(meepId, request.body());
+            String commentId = commentController.postNewComment(meepId, urlData.get("senderName"), urlData.get("senderId"));
 
             //Guardamos la info de la imagen en DB local
             DBController controller = new DBController();
