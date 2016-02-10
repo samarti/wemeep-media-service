@@ -22,7 +22,7 @@ import java.io.InputStreamReader;
  */
 public class CommentController {
 
-    public String postNewComment(String rootMeepId, String senderName, String senderId) throws Exception {
+    public String postNewComment(String rootMeepId, String senderName, String senderId, String picName) throws Exception {
         HttpClient client = new DefaultHttpClient();
         HttpPost post = new HttpPost(ApiController.MEEP_SERVICE_URL + "/" + rootMeepId + "/comments");
 
@@ -30,6 +30,7 @@ public class CommentController {
         json.addProperty("senderName", senderName);
         json.addProperty("senderId", senderId);
         json.addProperty("type", "picture");
+        json.addProperty("pictureUrl", picName);
         StringEntity entity = new StringEntity(json.toString());
         post.setEntity(entity);
         HttpResponse response = client.execute(post);

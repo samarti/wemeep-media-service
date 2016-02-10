@@ -220,7 +220,7 @@ public class ApiController {
 
             //Creamos el comentario en meep service
             CommentController commentController = new CommentController();
-            String commentId = commentController.postNewComment(meepId, urlData.get("senderName"), urlData.get("senderId"));
+            String commentId = commentController.postNewComment(meepId, urlData.get("senderName"), urlData.get("senderId"), fileName);
 
             //Guardamos la info de la imagen en DB local
             DBController controller = new DBController();
