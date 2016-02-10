@@ -185,8 +185,11 @@ public class ApiController {
                 throw new Exception("senderName or senderId missing");
             System.out.println("3");
             MultipartConfigElement multipartConfigElement = new MultipartConfigElement("/temp");
-            request.raw().setAttribute("org.eclipse.jetty.multipartConfig",multipartConfigElement);
+            System.out.println("3.1");
+            request.raw().setAttribute("org.eclipse.jetty.multipartConfig", multipartConfigElement);
+            System.out.println("3.2");
             Collection<Part> files = request.raw().getParts();
+            System.out.println("3.3");
             if(files.size() == 0 || files.size() > 1){
                 throw new Exception("No files or more than 1 file detected");
             }
