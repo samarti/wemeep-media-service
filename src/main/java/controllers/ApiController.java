@@ -171,28 +171,31 @@ public class ApiController {
         JsonObject ret = new JsonObject();
         OutputStream outputStream;
         String meepId = request.params(":id");
+        System.out.println("1");
         if(meepId == null){
             ret.addProperty("Error", "Missing meep id");
             response.body(ret.getAsString());
             return response;
         }
         try {
-
+            System.out.println("2");
             //Chequeamos que vengan los datos del sender
             Map<String, String> urlData = Utils.splitQuery(request.queryString());
             if(!urlData.containsKey("senderName") || !urlData.containsKey("senderId"))
                 throw new Exception("senderName or senderId missing");
-
+            System.out.println("3");
             MultipartConfigElement multipartConfigElement = new MultipartConfigElement("/temp");
             request.raw().setAttribute("org.eclipse.jetty.multipartConfig",multipartConfigElement);
             Collection<Part> files = request.raw().getParts();
             if(files.size() == 0 || files.size() > 1){
                 throw new Exception("No files or more than 1 file detected");
             }
+            System.out.println("4");
             Part p = (Part) files.toArray()[0];
             if(!p.getName().equals("picture")){
                 throw new Exception("File must be called picture");
             }
+            System.out.println("5");
             String extensionRemoved;
             try {
                 String[] auxDotParts = p.getSubmittedFileName().split("\\.");
@@ -200,6 +203,7 @@ public class ApiController {
             } catch (Exception e){
                 throw new Exception("File must contain extension.");
             }
+            System.out.println("6");
             String fileName =  (getRandomString() + "_" + p.getSubmittedFileName()).replaceAll("[^A-Za-z0-9 ]", "") + "." + extensionRemoved;
             String tempFile = "/" + fileName;
             //String tempFile = "/Users/santiagomarti/Desktop/" + fileName;
@@ -209,19 +213,24 @@ public class ApiController {
             outputStream = new FileOutputStream(tempFile);
             int read = 0;
             byte[] bytes = new byte[1024];
-
+            System.out.println("6");
             while ((read = inputStream.read(bytes)) != -1) {
                 outputStream.write(bytes, 0, read);
             }
+            System.out.println("7");
             outputStream.close();
             inputStream.close();
             if(auxFile.length() > 1500 * 1000)
                 throw new Exception("File must be lighter than 1500kB");
-
+            System.out.println("8");
             //Creamos el comentario en meep service
             CommentController commentController = new CommentController();
             String commentId = commentController.postNewComment(meepId, urlData.get("senderName"), urlData.get("senderId"), fileName);
-
+            System.out.println("9");
+            ret.addProperty("Success", true);
+            ret.addProperty("url", ROOT_URL + fileName);
+            ret.addProperty("id", commentId);
+            System.out.println("10");
             new Thread(() -> {
                 try {
                     //Guardamos la info de la imagen en DB local
@@ -231,9 +240,6 @@ public class ApiController {
                         service.deleteObject(picturesBucket, existentName);
                     S3Object object = new S3Object(auxFile);
                     service.putObject(picturesBucket, object);
-                    ret.addProperty("Success", true);
-                    ret.addProperty("url", ROOT_URL + fileName);
-                    ret.addProperty("id", commentId);
                     controller.upsertCommentPicture(fileName, commentId);
                 } catch (S3ServiceException | NoSuchAlgorithmException | IOException e){
                     System.out.println(e.getMessage());
@@ -250,6 +256,7 @@ public class ApiController {
             for(int i = 0; i < e2.getStackTrace().length; i++)
                 ret.addProperty("Error: " + i, e2.getStackTrace()[i].toString());
         } finally {
+            System.out.println("11");
             response.body(ret.toString());
             return response;
         }
