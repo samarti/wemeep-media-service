@@ -14,6 +14,7 @@ import javax.servlet.MultipartConfigElement;
 import javax.servlet.http.Part;
 import java.io.*;
 import java.math.BigInteger;
+import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 import java.util.Collection;
 import java.util.Map;
@@ -166,11 +167,10 @@ public class ApiController {
      * @param request
      * @return
      */
-    public static Response postCommentPicture(Response response, Request request){
+    public synchronized static Response postCommentPicture(Response response, Request request){
         JsonObject ret = new JsonObject();
         OutputStream outputStream;
         String meepId = request.params(":id");
-        File auxFile = null;
         if(meepId == null){
             ret.addProperty("Error", "Missing meep id");
             response.body(ret.getAsString());
@@ -204,7 +204,7 @@ public class ApiController {
             String tempFile = "/" + fileName;
             //String tempFile = "/Users/santiagomarti/Desktop/" + fileName;
             InputStream inputStream = p.getInputStream();
-            auxFile = new File(tempFile);
+            final File auxFile = new File(tempFile);
             auxFile.createNewFile();
             outputStream = new FileOutputStream(tempFile);
             int read = 0;
@@ -222,17 +222,27 @@ public class ApiController {
             CommentController commentController = new CommentController();
             String commentId = commentController.postNewComment(meepId, urlData.get("senderName"), urlData.get("senderId"), fileName);
 
-            //Guardamos la info de la imagen en DB local
-            DBController controller = new DBController();
-            String existentName = controller.getCommentPicture(commentId);
-            if(existentName != null)
-                service.deleteObject(picturesBucket, existentName);
-            S3Object object = new S3Object(auxFile);
-            service.putObject(picturesBucket, object);
-            ret.addProperty("Success", true);
-            ret.addProperty("url", ROOT_URL + fileName);
-            ret.addProperty("id", commentId);
-            controller.upsertCommentPicture(fileName, commentId);
+            new Thread(() -> {
+                try {
+                    //Guardamos la info de la imagen en DB local
+                    DBController controller = new DBController();
+                    String existentName = controller.getCommentPicture(commentId);
+                    if (existentName != null)
+                        service.deleteObject(picturesBucket, existentName);
+                    S3Object object = new S3Object(auxFile);
+                    service.putObject(picturesBucket, object);
+                    ret.addProperty("Success", true);
+                    ret.addProperty("url", ROOT_URL + fileName);
+                    ret.addProperty("id", commentId);
+                    controller.upsertCommentPicture(fileName, commentId);
+                } catch (S3ServiceException | NoSuchAlgorithmException | IOException e){
+                    System.out.println(e.getMessage());
+                } finally {
+                    if(auxFile != null)
+                        auxFile.delete();
+                }
+            }).start();
+
         } catch (Exception e2){
             System.out.println(e2.getMessage());
             ret.addProperty("Error", e2.getMessage());
@@ -241,8 +251,6 @@ public class ApiController {
                 ret.addProperty("Error: " + i, e2.getStackTrace()[i].toString());
         } finally {
             response.body(ret.toString());
-            if(auxFile != null)
-                auxFile.delete();
             return response;
         }
     }
