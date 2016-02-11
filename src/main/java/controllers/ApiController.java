@@ -1,6 +1,9 @@
 package controllers;
 
 import com.google.gson.JsonObject;
+import org.apache.commons.fileupload.FileItem;
+import org.apache.commons.fileupload.disk.DiskFileItemFactory;
+import org.apache.commons.fileupload.servlet.ServletFileUpload;
 import org.jets3t.service.S3Service;
 import org.jets3t.service.S3ServiceException;
 import org.jets3t.service.impl.rest.httpclient.RestS3Service;
@@ -17,6 +20,7 @@ import java.math.BigInteger;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 import java.util.Collection;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -183,28 +187,37 @@ public class ApiController {
             Map<String, String> urlData = Utils.splitQuery(request.queryString());
             if(!urlData.containsKey("senderName") || !urlData.containsKey("senderId"))
                 throw new Exception("senderName or senderId missing");
-            System.out.println("3");
-            MultipartConfigElement multipartConfigElement = new MultipartConfigElement("/temp");
-            System.out.println("3.1");
-            request.raw().setAttribute("org.eclipse.jetty.multipartConfig", multipartConfigElement);
-            System.out.println("3.2");
-            Part file = request.raw().getPart("picture");
-            if(file == null || !file.getName().equals("picture")){
+
+            final File upload = new File("upload");
+            if (!upload.exists() && !upload.mkdirs()) {
+                throw new RuntimeException("Failed to create directory " + upload.getAbsolutePath());
+            }
+
+            DiskFileItemFactory factory = new DiskFileItemFactory();
+            factory.setRepository(upload);
+            ServletFileUpload fileUpload = new ServletFileUpload(factory);
+            List<FileItem> items = fileUpload.parseRequest(request.raw());
+
+            FileItem item = items.stream()
+                    .filter(e -> "picture".equals(e.getFieldName()))
+                    .findFirst().get();
+
+            if(item == null){
                 throw new Exception("File must be called picture");
             }
             System.out.println("5");
             String extensionRemoved;
             try {
-                String[] auxDotParts = file.getSubmittedFileName().split("\\.");
+                String[] auxDotParts = item.getName().split("\\.");
                 extensionRemoved = auxDotParts[auxDotParts.length - 1];
             } catch (Exception e){
                 throw new Exception("File must contain extension.");
             }
             System.out.println("6");
-            String fileName =  (getRandomString() + "_" + file.getSubmittedFileName()).replaceAll("[^A-Za-z0-9 ]", "") + "." + extensionRemoved;
+            String fileName =  (getRandomString() + "_" + item.getName()).replaceAll("[^A-Za-z0-9 ]", "") + "." + extensionRemoved;
             String tempFile = "/" + fileName;
             //String tempFile = "/Users/santiagomarti/Desktop/" + fileName;
-            InputStream inputStream = file.getInputStream();
+            InputStream inputStream = item.getInputStream();
             final File auxFile = new File(tempFile);
             auxFile.createNewFile();
             outputStream = new FileOutputStream(tempFile);
