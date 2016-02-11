@@ -188,29 +188,23 @@ public class ApiController {
             System.out.println("3.1");
             request.raw().setAttribute("org.eclipse.jetty.multipartConfig", multipartConfigElement);
             System.out.println("3.2");
-            Collection<Part> files = request.raw().getParts();
-            System.out.println("3.3");
-            if(files.size() == 0 || files.size() > 1){
-                throw new Exception("No files or more than 1 file detected");
-            }
-            System.out.println("4");
-            Part p = (Part) files.toArray()[0];
-            if(!p.getName().equals("picture")){
+            Part file = request.raw().getPart("picture");
+            if(file == null || !file.getName().equals("picture")){
                 throw new Exception("File must be called picture");
             }
             System.out.println("5");
             String extensionRemoved;
             try {
-                String[] auxDotParts = p.getSubmittedFileName().split("\\.");
+                String[] auxDotParts = file.getSubmittedFileName().split("\\.");
                 extensionRemoved = auxDotParts[auxDotParts.length - 1];
             } catch (Exception e){
                 throw new Exception("File must contain extension.");
             }
             System.out.println("6");
-            String fileName =  (getRandomString() + "_" + p.getSubmittedFileName()).replaceAll("[^A-Za-z0-9 ]", "") + "." + extensionRemoved;
+            String fileName =  (getRandomString() + "_" + file.getSubmittedFileName()).replaceAll("[^A-Za-z0-9 ]", "") + "." + extensionRemoved;
             String tempFile = "/" + fileName;
             //String tempFile = "/Users/santiagomarti/Desktop/" + fileName;
-            InputStream inputStream = p.getInputStream();
+            InputStream inputStream = file.getInputStream();
             final File auxFile = new File(tempFile);
             auxFile.createNewFile();
             outputStream = new FileOutputStream(tempFile);
