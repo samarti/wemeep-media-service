@@ -176,6 +176,7 @@ public class ApiController {
         OutputStream outputStream;
         String meepId = request.params(":id");
         System.out.println("1");
+        File auxFile = null;
         if(meepId == null){
             ret.addProperty("Error", "Missing meep id");
             response.body(ret.getAsString());
@@ -218,7 +219,7 @@ public class ApiController {
             String tempFile = "/" + fileName;
             //String tempFile = "/Users/santiagomarti/Desktop/" + fileName;
             InputStream inputStream = item.getInputStream();
-            final File auxFile = new File(tempFile);
+            auxFile = new File(tempFile);
             auxFile.createNewFile();
             outputStream = new FileOutputStream(tempFile);
             int read = 0;
@@ -241,23 +242,14 @@ public class ApiController {
             ret.addProperty("url", ROOT_URL + fileName);
             ret.addProperty("id", commentId);
             System.out.println("10");
-            new Thread(() -> {
-                try {
-                    //Guardamos la info de la imagen en DB local
-                    DBController controller = new DBController();
-                    String existentName = controller.getCommentPicture(commentId);
-                    if (existentName != null)
-                        service.deleteObject(picturesBucket, existentName);
-                    S3Object object = new S3Object(auxFile);
-                    service.putObject(picturesBucket, object);
-                    controller.upsertCommentPicture(fileName, commentId);
-                } catch (S3ServiceException | NoSuchAlgorithmException | IOException e){
-                    System.out.println(e.getMessage());
-                } finally {
-                    if(auxFile != null)
-                        auxFile.delete();
-                }
-            }).start();
+            //Guardamos la info de la imagen en DB local
+            DBController controller = new DBController();
+            String existentName = controller.getCommentPicture(commentId);
+            if (existentName != null)
+                service.deleteObject(picturesBucket, existentName);
+            S3Object object = new S3Object(auxFile);
+            service.putObject(picturesBucket, object);
+            controller.upsertCommentPicture(fileName, commentId);
 
         } catch (Exception e2){
             System.out.println(e2.getMessage());
@@ -268,6 +260,8 @@ public class ApiController {
         } finally {
             System.out.println("11");
             response.body(ret.toString());
+            if(auxFile != null)
+                auxFile.delete();
             return response;
         }
     }
