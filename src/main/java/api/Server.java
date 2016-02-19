@@ -32,5 +32,7 @@ public class Server {
 
         post("/pictures/comment/:id", (request, response) -> ApiController.postCommentPicture(response, request).body());
 
+        post("/pictures/meeps/:id", (request, response) -> ApiController.postMeepPicture(response, request).body());
+
     }
 }

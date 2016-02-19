@@ -171,13 +171,13 @@ public class ApiController {
      * @param request
      * @return
      */
-    public synchronized static Response postCommentPicture(Response response, Request request){
+    public synchronized static Response postCommentPicture(Response response, Request request) {
         JsonObject ret = new JsonObject();
         OutputStream outputStream;
         String meepId = request.params(":id");
         System.out.println("1");
         File auxFile = null;
-        if(meepId == null){
+        if (meepId == null) {
             ret.addProperty("Error", "Missing meep id");
             response.body(ret.getAsString());
             return response;
@@ -186,9 +186,104 @@ public class ApiController {
             System.out.println("2");
             //Chequeamos que vengan los datos del sender
             Map<String, String> urlData = Utils.splitQuery(request.queryString());
-            if(!urlData.containsKey("senderName") || !urlData.containsKey("senderId"))
+            if (!urlData.containsKey("senderName") || !urlData.containsKey("senderId"))
                 throw new Exception("senderName or senderId missing");
 
+            final File upload = new File("upload");
+            if (!upload.exists() && !upload.mkdirs()) {
+                throw new RuntimeException("Failed to create directory " + upload.getAbsolutePath());
+            }
+
+            DiskFileItemFactory factory = new DiskFileItemFactory();
+            factory.setRepository(upload);
+            ServletFileUpload fileUpload = new ServletFileUpload(factory);
+            List<FileItem> items = fileUpload.parseRequest(request.raw());
+
+            FileItem item = items.stream()
+                    .filter(e -> "picture".equals(e.getFieldName()))
+                    .findFirst().get();
+
+            if (item == null) {
+                throw new Exception("File must be called picture");
+            }
+            System.out.println("5");
+            String extensionRemoved;
+            try {
+                String[] auxDotParts = item.getName().split("\\.");
+                extensionRemoved = auxDotParts[auxDotParts.length - 1];
+            } catch (Exception e) {
+                throw new Exception("File must contain extension.");
+            }
+            System.out.println("6");
+            String fileName = (getRandomString() + "_" + item.getName()).replaceAll("[^A-Za-z0-9 ]", "") + "." + extensionRemoved;
+            String tempFile = "/" + fileName;
+            //String tempFile = "/Users/santiagomarti/Desktop/" + fileName;
+            InputStream inputStream = item.getInputStream();
+            auxFile = new File(tempFile);
+            auxFile.createNewFile();
+            outputStream = new FileOutputStream(tempFile);
+            int read = 0;
+            byte[] bytes = new byte[1024];
+            System.out.println("6");
+            while ((read = inputStream.read(bytes)) != -1) {
+                outputStream.write(bytes, 0, read);
+            }
+            System.out.println("7");
+            outputStream.close();
+            inputStream.close();
+            if (auxFile.length() > 500 * 1000)
+                throw new Exception("File must be lighter than 500kB");
+            System.out.println("8");
+            //Creamos el comentario en meep service
+            CommentController commentController = new CommentController();
+            String commentId = commentController.postNewComment(meepId, urlData.get("senderName"), urlData.get("senderId"), fileName);
+            System.out.println("9");
+            System.out.println("10");
+            //Guardamos la info de la imagen en DB local
+            DBController controller = new DBController();
+            String existentName = controller.getCommentPicture(commentId);
+            if (existentName != null)
+                service.deleteObject(picturesBucket, existentName);
+            S3Object object = new S3Object(auxFile);
+            service.putObject(picturesBucket, object);
+            controller.upsertCommentPicture(fileName, commentId);
+
+            ret.addProperty("Success", true);
+            ret.addProperty("url", ROOT_URL + fileName);
+            ret.addProperty("id", commentId);
+
+        } catch (Exception e2) {
+            System.out.println(e2.getMessage());
+            ret.addProperty("Error", e2.getMessage());
+            ret.addProperty("Error2", e2.toString());
+            for (int i = 0; i < e2.getStackTrace().length; i++)
+                ret.addProperty("Error: " + i, e2.getStackTrace()[i].toString());
+        } finally {
+            System.out.println("11");
+            response.body(ret.toString());
+            if (auxFile != null)
+                auxFile.delete();
+            return response;
+        }
+    }
+
+        /**
+         * Saves a file to a temp file, uploads it to S3 bucket, deletes the temp file and returns the path.
+         * @param response
+         * @param request
+         * @return
+         */
+    public synchronized static Response postMeepPicture(Response response, Request request){
+        JsonObject ret = new JsonObject();
+        OutputStream outputStream;
+        String meepId = request.params(":id");
+        File auxFile = null;
+        if(meepId == null){
+            ret.addProperty("Error", "Missing meep id");
+            response.body(ret.getAsString());
+            return response;
+        }
+        try {
             final File upload = new File("upload");
             if (!upload.exists() && !upload.mkdirs()) {
                 throw new RuntimeException("Failed to create directory " + upload.getAbsolutePath());
@@ -206,7 +301,7 @@ public class ApiController {
             if(item == null){
                 throw new Exception("File must be called picture");
             }
-            System.out.println("5");
+
             String extensionRemoved;
             try {
                 String[] auxDotParts = item.getName().split("\\.");
@@ -214,51 +309,39 @@ public class ApiController {
             } catch (Exception e){
                 throw new Exception("File must contain extension.");
             }
-            System.out.println("6");
+
             String fileName =  (getRandomString() + "_" + item.getName()).replaceAll("[^A-Za-z0-9 ]", "") + "." + extensionRemoved;
             String tempFile = "/" + fileName;
-            //String tempFile = "/Users/santiagomarti/Desktop/" + fileName;
             InputStream inputStream = item.getInputStream();
             auxFile = new File(tempFile);
             auxFile.createNewFile();
             outputStream = new FileOutputStream(tempFile);
             int read = 0;
             byte[] bytes = new byte[1024];
-            System.out.println("6");
             while ((read = inputStream.read(bytes)) != -1) {
                 outputStream.write(bytes, 0, read);
             }
-            System.out.println("7");
             outputStream.close();
             inputStream.close();
-            if(auxFile.length() > 1500 * 1000)
-                throw new Exception("File must be lighter than 1500kB");
-            System.out.println("8");
-            //Creamos el comentario en meep service
-            CommentController commentController = new CommentController();
-            String commentId = commentController.postNewComment(meepId, urlData.get("senderName"), urlData.get("senderId"), fileName);
-            System.out.println("9");
-            ret.addProperty("Success", true);
-            ret.addProperty("url", ROOT_URL + fileName);
-            ret.addProperty("id", commentId);
-            System.out.println("10");
-            //Guardamos la info de la imagen en DB local
+            if(auxFile.length() > 500 * 1000)
+                throw new Exception("File must be lighter than 500kB");
+
+
             DBController controller = new DBController();
-            String existentName = controller.getCommentPicture(commentId);
-            if (existentName != null)
-                service.deleteObject(picturesBucket, existentName);
             S3Object object = new S3Object(auxFile);
             service.putObject(picturesBucket, object);
-            controller.upsertCommentPicture(fileName, commentId);
+            controller.upsertMeepPicture(fileName, meepId);
+
+            ret.addProperty("Success", true);
+            ret.addProperty("url", ROOT_URL + fileName);
 
         } catch (Exception e2){
             System.out.println(e2.getMessage());
             ret.addProperty("Error", e2.getMessage());
             ret.addProperty("Error2", e2.toString());
             for(int i = 0; i < e2.getStackTrace().length; i++)
-                ret.addProperty("Error: " + i, e2.getStackTrace()[i].toString());
+                ret.addProperty("Error " + i, e2.getStackTrace()[i].toString());
         } finally {
-            System.out.println("11");
             response.body(ret.toString());
             if(auxFile != null)
                 auxFile.delete();

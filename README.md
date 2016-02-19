@@ -42,13 +42,20 @@ Returns  { "url": <picture url> } or { "Error": <some error>}
 ```
 
 - Upload a comment picture with `POST`. Picture must be a form-data key-value entry, with
-key = "picture" and lighter than 1.5Mb:
+key = "picture" and lighter than 500KB:
 
 ```
 http://host:4567/pictures/comment/<rootMeepId>?senderId=<senderId>&senderName=<senderName>
 Returns { "id":<commentId>, "url": <picture url>} or { "Error": <some error>}
 ```
 
+- Upload a meep picture with `POST`. Picture must be a form-data key-value entry, with
+key = "picture" and lighter than 500KB:
+
+```
+http://host:4567/pictures/meeps/<rootMeepId>
+Returns { "url": <picture url>} or { "Error": <some error>}
+```
 
 - Get a comment picture with `GET`:
 

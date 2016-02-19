@@ -18,6 +18,7 @@ public class DBController {
 
     private static final String profilePicturesTable = "profile_pictures";
     private static final String commentPicturesTable = "comment_pictures";
+    private static final String meepPicturesTable = "meep_pictures";
 
     public void init() {
 
@@ -45,8 +46,11 @@ public class DBController {
                     " createdAt timestamp DEFAULT now() NOT NULL)";
             String commentPictures = "create table if not exists " + commentPicturesTable + " (id SERIAL primary key, fileName char(100) not null," +
                     " commentId char(200) not null, createdAt timestamp DEFAULT now() NOT NULL)";
+            String meepPictures = "create table if not exists " + meepPicturesTable + " (id SERIAL primary key, fileName char(100) not null," +
+                    " meepId char(200) not null, createdAt timestamp DEFAULT now() NOT NULL)";
             stmt.execute(profilePictures);
             stmt.execute(commentPictures);
+            stmt.execute(meepPictures);
         } catch (Exception e) {
             e.printStackTrace();
             System.err.println(e.getClass().getName() + ": " + e.getMessage());
@@ -67,6 +71,17 @@ public class DBController {
     public void upsertCommentPicture(String fileName, String commentId){
         try {
             String insert = "WITH upsert AS (UPDATE " + commentPicturesTable + " SET fileName = \'" + fileName + "\' WHERE commentId = \'"+ commentId + "\' RETURNING *) INSERT INTO " + commentPicturesTable + " (commentId, fileName) SELECT \'"+ commentId + "\', \'"+ fileName + "\' WHERE NOT EXISTS (SELECT * FROM upsert)";
+            Statement stmt = c.createStatement();
+            stmt.execute(insert);
+        } catch (SQLException e) {
+            e.printStackTrace();
+            System.err.println(e.getClass().getName() + ": " + e.getMessage());
+        }
+    }
+
+    public void upsertMeepPicture(String fileName, String meepId){
+        try {
+            String insert = "WITH upsert AS (UPDATE " + meepPicturesTable + " SET fileName = \'" + fileName + "\' WHERE meepId = \'"+ meepId + "\' RETURNING *) INSERT INTO " + meepPicturesTable + " (meepId, fileName) SELECT \'"+ meepId + "\', \'"+ fileName + "\' WHERE NOT EXISTS (SELECT * FROM upsert)";
             Statement stmt = c.createStatement();
             stmt.execute(insert);
         } catch (SQLException e) {
