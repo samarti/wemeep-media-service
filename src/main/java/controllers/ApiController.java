@@ -332,7 +332,7 @@ public class ApiController {
             String meepUpdateResult = controller1.addPictureUrlToMeep(meepId, ROOT_URL + fileName);
             JsonParser parser = new JsonParser();
             JsonObject meepUpdateResultJson = parser.parse(meepUpdateResult).getAsJsonObject();
-            ret.addProperty("WasMeepUpdated", meepUpdateResultJson.get("Success").getAsBoolean());
+            ret.addProperty("WasMeepUpdated", meepUpdateResultJson.get("Succes").getAsBoolean());
         } catch (Exception e2){
             System.out.println(e2.getMessage());
             ret.addProperty("Error", e2.getMessage());
