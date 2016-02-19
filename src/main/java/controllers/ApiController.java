@@ -206,7 +206,6 @@ public class ApiController {
             if (item == null) {
                 throw new Exception("File must be called picture");
             }
-            System.out.println("5");
             String extensionRemoved;
             try {
                 String[] auxDotParts = item.getName().split("\\.");
@@ -214,7 +213,6 @@ public class ApiController {
             } catch (Exception e) {
                 throw new Exception("File must contain extension.");
             }
-            System.out.println("6");
             String fileName = (getRandomString() + "_" + item.getName()).replaceAll("[^A-Za-z0-9 ]", "") + "." + extensionRemoved;
             String tempFile = "/" + fileName;
             //String tempFile = "/Users/santiagomarti/Desktop/" + fileName;
@@ -224,21 +222,17 @@ public class ApiController {
             outputStream = new FileOutputStream(tempFile);
             int read = 0;
             byte[] bytes = new byte[1024];
-            System.out.println("6");
             while ((read = inputStream.read(bytes)) != -1) {
                 outputStream.write(bytes, 0, read);
             }
-            System.out.println("7");
             outputStream.close();
             inputStream.close();
-            if (auxFile.length() > 500 * 1000)
-                throw new Exception("File must be lighter than 500kB");
+            if (auxFile.length() > 1500 * 1000)
+                throw new Exception("File must be lighter than 1500kB");
             System.out.println("8");
             //Creamos el comentario en meep service
             ExternalServicesController externalServicesController = new ExternalServicesController();
             String commentId = externalServicesController.postNewComment(meepId, urlData.get("senderName"), urlData.get("senderId"), fileName);
-            System.out.println("9");
-            System.out.println("10");
             //Guardamos la info de la imagen en DB local
             DBController controller = new DBController();
             String existentName = controller.getCommentPicture(commentId);
@@ -323,8 +317,8 @@ public class ApiController {
             }
             outputStream.close();
             inputStream.close();
-            if(auxFile.length() > 500 * 1000)
-                throw new Exception("File must be lighter than 500kB");
+            if(auxFile.length() > 1500 * 1000)
+                throw new Exception("File must be lighter than 1500kB");
 
 
             DBController controller = new DBController();
