@@ -1,6 +1,7 @@
 package controllers;
 
 import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 import org.apache.commons.fileupload.FileItem;
 import org.apache.commons.fileupload.disk.DiskFileItemFactory;
 import org.apache.commons.fileupload.servlet.ServletFileUpload;
@@ -17,7 +18,6 @@ import javax.servlet.MultipartConfigElement;
 import javax.servlet.http.Part;
 import java.io.*;
 import java.math.BigInteger;
-import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 import java.util.Collection;
 import java.util.List;
@@ -235,8 +235,8 @@ public class ApiController {
                 throw new Exception("File must be lighter than 500kB");
             System.out.println("8");
             //Creamos el comentario en meep service
-            CommentController commentController = new CommentController();
-            String commentId = commentController.postNewComment(meepId, urlData.get("senderName"), urlData.get("senderId"), fileName);
+            ExternalServicesController externalServicesController = new ExternalServicesController();
+            String commentId = externalServicesController.postNewComment(meepId, urlData.get("senderName"), urlData.get("senderId"), fileName);
             System.out.println("9");
             System.out.println("10");
             //Guardamos la info de la imagen en DB local
@@ -331,10 +331,14 @@ public class ApiController {
             S3Object object = new S3Object(auxFile);
             service.putObject(picturesBucket, object);
             controller.upsertMeepPicture(fileName, meepId);
-
             ret.addProperty("Success", true);
             ret.addProperty("url", ROOT_URL + fileName);
 
+            ExternalServicesController controller1 = new ExternalServicesController();
+            String meepUpdateResult = controller1.addPictureUrlToMeep(meepId, ROOT_URL + fileName);
+            JsonParser parser = new JsonParser();
+            JsonObject meepUpdateResultJson = parser.parse(meepUpdateResult).getAsJsonObject();
+            ret.addProperty("WasMeepUpdated", meepUpdateResultJson.get("Success").getAsBoolean());
         } catch (Exception e2){
             System.out.println(e2.getMessage());
             ret.addProperty("Error", e2.getMessage());

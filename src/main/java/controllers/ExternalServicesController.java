@@ -6,6 +6,7 @@ import com.google.gson.JsonParser;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpPost;
+import org.apache.http.client.methods.HttpPut;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.DefaultHttpClient;
 
@@ -20,7 +21,7 @@ import java.io.InputStreamReader;
  * of the 9th Circle of Hell, while watching "Friday" sang live by
  * Rebecca Black
  */
-public class CommentController {
+public class ExternalServicesController {
 
     public String postNewComment(String rootMeepId, String senderName, String senderId, String picName) throws Exception {
         HttpClient client = new DefaultHttpClient();
@@ -34,6 +35,29 @@ public class CommentController {
         StringEntity entity = new StringEntity(json.toString());
         post.setEntity(entity);
         HttpResponse response = client.execute(post);
+        BufferedReader rd = new BufferedReader(new InputStreamReader(response.getEntity().getContent()));
+
+        StringBuffer result = new StringBuffer();
+        String line = "";
+        while ((line = rd.readLine()) != null) {
+            result.append(line);
+        }
+        JsonParser parser = new JsonParser();
+        JsonObject aux = parser.parse(result.toString()).getAsJsonObject();
+        if(aux.has("Error"))
+            throw new Exception("Error from Meep Service: " + aux.get("Error").getAsString());
+        return aux.get("id").getAsString();
+    }
+
+    public String addPictureUrlToMeep(String rootMeep, String pictureUrl) throws Exception{
+        HttpClient client = new DefaultHttpClient();
+        HttpPut put = new HttpPut(ApiController.MEEP_SERVICE_URL + "/" + rootMeep );
+
+        JsonObject json = new JsonObject();
+        json.addProperty("pictureUrl", pictureUrl);
+        StringEntity entity = new StringEntity(json.toString());
+        put.setEntity(entity);
+        HttpResponse response = client.execute(put);
         BufferedReader rd = new BufferedReader(new InputStreamReader(response.getEntity().getContent()));
 
         StringBuffer result = new StringBuffer();
