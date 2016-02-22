@@ -42,11 +42,7 @@ public class ExternalServicesController {
         while ((line = rd.readLine()) != null) {
             result.append(line);
         }
-        JsonParser parser = new JsonParser();
-        JsonObject aux = parser.parse(result.toString()).getAsJsonObject();
-        if(aux.has("Error"))
-            throw new Exception("Error from Meep Service: " + aux.get("Error").getAsString());
-        return aux.get("id").getAsString();
+        return result.toString();
     }
 
     public String addPictureUrlToMeep(String rootMeep, String pictureUrl) throws Exception{

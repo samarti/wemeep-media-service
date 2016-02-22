@@ -232,7 +232,13 @@ public class ApiController {
             System.out.println("8");
             //Creamos el comentario en meep service
             ExternalServicesController externalServicesController = new ExternalServicesController();
-            String commentId = externalServicesController.postNewComment(meepId, urlData.get("senderName"), urlData.get("senderId"), fileName);
+            String result = externalServicesController.postNewComment(meepId, urlData.get("senderName"), urlData.get("senderId"), fileName);
+            JsonParser parser = new JsonParser();
+            JsonObject aux = parser.parse(result.toString()).getAsJsonObject();
+            if(aux.has("Error"))
+                throw new Exception("Error from Meep Service: " + aux.get("Error").getAsString());
+            String commentId = aux.get("id").getAsString();
+            String createdAt = aux.get("createdAt").getAsString();
             //Guardamos la info de la imagen en DB local
             DBController controller = new DBController();
             String existentName = controller.getCommentPicture(commentId);
@@ -245,7 +251,7 @@ public class ApiController {
             ret.addProperty("Success", true);
             ret.addProperty("url", ROOT_URL + fileName);
             ret.addProperty("id", commentId);
-
+            ret.addProperty("createdAt", createdAt);
         } catch (Exception e2) {
             System.out.println(e2.getMessage());
             ret.addProperty("Error", e2.getMessage());
