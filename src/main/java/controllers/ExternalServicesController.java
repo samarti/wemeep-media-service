@@ -47,12 +47,32 @@ public class ExternalServicesController {
 
     public String addPictureUrlToMeep(String rootMeep, String pictureUrl) throws Exception{
         HttpClient client = new DefaultHttpClient();
-        HttpPut put = new HttpPut(ApiController.MEEP_SERVICE_URL + "/" + rootMeep );
+        HttpPut put = new HttpPut(ApiController.MEEP_SERVICE_URL + "meeps/" + rootMeep );
 
         JsonObject json = new JsonObject();
         json.addProperty("pictureUrl", pictureUrl);
         StringEntity entity = new StringEntity(json.toString());
         put.setEntity(entity);
+        HttpResponse response = client.execute(put);
+        BufferedReader rd = new BufferedReader(new InputStreamReader(response.getEntity().getContent()));
+
+        StringBuffer result = new StringBuffer();
+        String line = "";
+        while ((line = rd.readLine()) != null) {
+            result.append(line);
+        }
+        return result.toString();
+    }
+
+    public String addPictureUrlToUser(String userId, String pictureUrl) throws Exception{
+        HttpClient client = new DefaultHttpClient();
+        HttpPut put = new HttpPut(ApiController.USER_SERVICE_URL + "users/" + userId );
+
+        JsonObject json = new JsonObject();
+        json.addProperty("picture", pictureUrl);
+        StringEntity entity = new StringEntity(json.toString());
+        put.setEntity(entity);
+        put.addHeader("Content-Type", "application/json");
         HttpResponse response = client.execute(put);
         BufferedReader rd = new BufferedReader(new InputStreamReader(response.getEntity().getContent()));
 

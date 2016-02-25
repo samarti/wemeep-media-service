@@ -37,8 +37,12 @@ public class ApiController {
     static String awsSecretKey = System.getenv().get("AWS_SECRET_KEY");
 
     private static final String ROOT_URL = "http://d1edk0932xwypd.cloudfront.net/";
+/*
+    public static final String MEEP_SERVICE_URL = "http://54.232.209.214:4567/";
+    public static final String USER_SERVICE_URL = "http://54.233.122.209:8080/";*/
 
-    public static final String MEEP_SERVICE_URL = "http://54.232.209.214:4567/meeps";
+    public static final String MEEP_SERVICE_URL = System.getenv().get("MEEP_SERVICE_URL");
+    public static final String USER_SERVICE_URL = System.getenv().get("USER_SERVICE_URL");
 
     private static SecureRandom random = new SecureRandom();
     private static S3Bucket picturesBucket;
@@ -146,6 +150,8 @@ public class ApiController {
             inputStream.close();
             if(auxFile.length() > 800 * 1000)
                 throw new Exception("File must be lighter than 800kB");
+            ExternalServicesController extController = new ExternalServicesController();
+            extController.addPictureUrlToUser(id, fileName);
             DBController controller = new DBController();
             String existentName = controller.getUserPicture(id);
             if(existentName != null)
@@ -229,7 +235,6 @@ public class ApiController {
             inputStream.close();
             if (auxFile.length() > 1500 * 1000)
                 throw new Exception("File must be lighter than 1500kB");
-            System.out.println("8");
             //Creamos el comentario en meep service
             ExternalServicesController externalServicesController = new ExternalServicesController();
             String result = externalServicesController.postNewComment(meepId, urlData.get("senderName"), urlData.get("senderId"), fileName);
@@ -259,7 +264,6 @@ public class ApiController {
             for (int i = 0; i < e2.getStackTrace().length; i++)
                 ret.addProperty("Error: " + i, e2.getStackTrace()[i].toString());
         } finally {
-            System.out.println("11");
             response.body(ret.toString());
             if (auxFile != null)
                 auxFile.delete();
