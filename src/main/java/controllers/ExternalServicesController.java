@@ -25,7 +25,7 @@ public class ExternalServicesController {
 
     public String postNewComment(String rootMeepId, String senderName, String senderId, String picName) throws Exception {
         HttpClient client = new DefaultHttpClient();
-        HttpPost post = new HttpPost(ApiController.MEEP_SERVICE_URL + "/" + rootMeepId + "/comments");
+        HttpPost post = new HttpPost(ApiController.MEEP_SERVICE_URL + "meeps/" + rootMeepId + "/comments");
 
         JsonObject json = new JsonObject();
         json.addProperty("senderName", senderName);

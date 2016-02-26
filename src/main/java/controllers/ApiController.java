@@ -260,7 +260,7 @@ public class ApiController {
         } catch (Exception e2) {
             System.out.println(e2.getMessage());
             ret.addProperty("Error", e2.getMessage());
-            ret.addProperty("Error2", e2.toString());
+            ret.addProperty("Error", e2.toString());
             for (int i = 0; i < e2.getStackTrace().length; i++)
                 ret.addProperty("Error: " + i, e2.getStackTrace()[i].toString());
         } finally {
